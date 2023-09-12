@@ -127,13 +127,13 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
     this.buffer.writeUInt8(codeTable);
     return this;
   }
-  
+
   /**
    * Set charset
    * @param  {[Number]} charset
    * @return {[Printer]} printer  [the escpos printer instance]
    */
-   setCharset(charset: number = _.CHARACTER_SET.TM_T20.US) {
+  setCharset(charset: number = _.CHARACTER_SET.TM_T20.US) {
     this.buffer.write(_.ESC);
     this.buffer.write("\x52");
     this.buffer.writeUInt8(charset);
@@ -168,14 +168,14 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * @return {[Printer]} printer  [the escpos printer instance]
    */
   setMarginLeft(size: number): Printer<AdapterCloseArgs> {
-    if (size > 65535) {
+    if (size > 65535)
       throw new Error("Max margin range exceeded");
-    }
+
     // 1D 4C nL nH
     this.buffer.write(_.GS);
     this.buffer.write("\x4C");
     const nL_nH = utils.intLowHighHex(size, 2);
-    this.buffer.write(Buffer.from(nL_nH, 'hex'));
+    this.buffer.write(Buffer.from(nL_nH, "hex"));
     return this;
   }
 
@@ -216,7 +216,7 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    */
   newLine(count = 1) {
     if (count <= 0)
-      throw Error('Count cannot be less or equal than 0');
+      throw new Error("Count cannot be less or equal than 0");
     else
       return this.print(_.EOL.repeat(count));
   }
@@ -239,11 +239,12 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
   drawLine(character: Buffer | string = "-") {
     let buffer: Buffer;
     // Allow to print hex codes from codepage
-    if (Buffer.isBuffer(character)) {
+    if (Buffer.isBuffer(character))
       buffer = character;
-    } else {
+
+    else
       buffer = Buffer.from(character);
-    }
+
     for (let i = 0; i < this.width; i++)
       this.buffer.write(buffer);
 
@@ -338,11 +339,16 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
           else lineStr += obj.text;
         }
 
-        let spaces = Math.floor(cellWidth - textLength);
+        // 왼쪽으로 한칸씩 당겨지는 오류 수정
+        let spaces = Math.floor(cellWidth - utils.textLength(lineStr));
         if (leftoverSpace > 0) {
           spaces += leftoverSpace;
           leftoverSpace = 0;
         }
+
+        // leftoverSpace가 celWidth를 초과하는 오류 수정
+        const lineStrLength = utils.textLength(lineStr);
+        if (spaces + lineStrLength > cellWidth) spaces = cellWidth - lineStrLength;
 
         for (let s = 0; s < spaces; s++) lineStr += " ";
       }
@@ -574,7 +580,7 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * @param  {[type]}    options  [description]
    * @return {[Printer]} printer  [the escpos printer instance]
    */
-  barcode(code: number, type: BarcodeType, options : BarcodeOptions) {
+  barcode(code: number, type: BarcodeType, options: BarcodeOptions) {
     options.font = options.font ?? "a";
     options.position = options.position ?? "blw";
     options.includeParity = options.includeParity ?? true;
@@ -944,23 +950,23 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * Sets the alignment of the top and bottom logo
    * @param  {[Alignment]} align - Align left, center or right
    */
-  private setLogoAlignment(align: Alignment = 'lt'): Printer<AdapterCloseArgs> {
-    switch(align) {
-      case 'lt':
-      case 'LT':
+  private setLogoAlignment(align: Alignment = "lt"): Printer<AdapterCloseArgs> {
+    switch (align) {
+      case "lt":
+      case "LT":
         this.buffer.write("\x30");
-      break;
-      case 'ct':
-      case 'CT':
+        break;
+      case "ct":
+      case "CT":
         this.buffer.write("\x31");
-      break;
-      case 'rt':
-      case 'RT':
+        break;
+      case "rt":
+      case "RT":
         this.buffer.write("\x32");
-      break;
+        break;
       default:
         this.buffer.write("\x30");
-      break;
+        break;
     }
 
     return this;
@@ -975,12 +981,12 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * @param  {[Alignment]} align - Align left, center or right
    * @return {[Printer]} printer  [the escpos printer instance]
    */
-  private setLogoPrinting(pL_pH: string, fn: string, kc1: number, kc2: number, align: Alignment = 'lt'): Printer<AdapterCloseArgs> {
-    if (kc1 < 32 || kc1 > 126) {
+  private setLogoPrinting(pL_pH: string, fn: string, kc1: number, kc2: number, align: Alignment = "lt"): Printer<AdapterCloseArgs> {
+    if (kc1 < 32 || kc1 > 126)
       throw new Error("Keycode 1 is out of range");
-    } else if (kc2 < 32 || kc2 > 126) {
+
+    else if (kc2 < 32 || kc2 > 126)
       throw new Error("Keycode 2 is out of range");
-    }
 
     this.buffer.write(_.RECEIPT_ENHANCEMENT);
     this.buffer.write(pL_pH);
@@ -1001,10 +1007,9 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * @param  {[Number]} space - Set number of lines to be removed after top logo printing
    * @return {[Printer]} printer  [the escpos printer instance]
    */
-  setTopLogoPrinting(kc1: number, kc2: number, align: Alignment = 'lt', space = 0): Printer<AdapterCloseArgs> {
-    if (space < 0 || space > 255) {
+  setTopLogoPrinting(kc1: number, kc2: number, align: Alignment = "lt", space = 0): Printer<AdapterCloseArgs> {
+    if (space < 0 || space > 255)
       throw new Error("Top logo space argument is out of range");
-    }
 
     this.setLogoPrinting("\x06\x00", "\x3E", kc1, kc2, align);
     this.buffer.writeUInt8(space);
@@ -1018,7 +1023,7 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * @param  {[Alignment]} align - Align left, center or right
    * @return {[Printer]} printer  [the escpos printer instance]
    */
-  setBottomLogoPrinting(kc1: number, kc2: number, align: Alignment = 'lt'): Printer<AdapterCloseArgs> {
+  setBottomLogoPrinting(kc1: number, kc2: number, align: Alignment = "lt"): Printer<AdapterCloseArgs> {
     this.setLogoPrinting("\x05\x00", "\x3F", kc1, kc2, align);
     return this;
   }
@@ -1029,7 +1034,7 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * @return {[Printer]} printer  [the escpos printer instance]
    */
   enableTopLogoPrinting(enable = true): Printer<AdapterCloseArgs> {
-    this.buffer.write(_.RECEIPT_ENHANCEMENT + "\x04\x00\x41\x02");
+    this.buffer.write(`${_.RECEIPT_ENHANCEMENT}\x04\x00\x41\x02`);
     this.buffer.write("\x30"); // top logo
     this.buffer.write(enable ? "\x30" : "\x31");
     return this;
@@ -1041,7 +1046,7 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * @return {[Printer]} printer  [the escpos printer instance]
    */
   enableBottomLogoPrinting(enable = true): Printer<AdapterCloseArgs> {
-    this.buffer.write(_.RECEIPT_ENHANCEMENT + "\x04\x00\x41\x02");
+    this.buffer.write(`${_.RECEIPT_ENHANCEMENT}\x04\x00\x41\x02`);
     this.buffer.write("\x31"); // bottom logo
     this.buffer.write(enable ? "\x30" : "\x31");
     return this;
