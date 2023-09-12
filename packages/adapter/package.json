@@ -1,18 +1,14 @@
 {
-  "name": "@node-escpos/adapter",
+  "name": "@dodoga/adapter",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "packageManager": "pnpm@7.2.1",
   "description": "",
-  "author": "Caspian <zhaodonghao586@outlook.com> (https://github.com/dohooo)",
   "license": "MIT",
-  "funding": "https://github.com/sponsors/dohooo",
-  "homepage": "https://github.com/node-escpos/driver/tree/main/packages/adapter",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/node-escpos/driver.git"
+    "url": "git+https://github.com/DoDoga/node-escpos.git"
   },
-  "bugs": "https://github.com/node-escpos/driver/issues",
   "keywords": [],
   "sideEffects": false,
   "exports": {
